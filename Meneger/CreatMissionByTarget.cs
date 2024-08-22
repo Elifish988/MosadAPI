@@ -18,7 +18,7 @@ namespace MosadApi.Meneger
             {
                 if (await IsNear(agent, target) && await IsVacant(agent))
                 {
-                    CreateMissoion(agent, target);
+                    await CreateMissoion(agent, target);
                 }
 
             }
@@ -35,6 +35,11 @@ namespace MosadApi.Meneger
 
             }
             return true;
+        }
+
+        public void DeleteOldTasks()
+        {
+            base.DeleteOldTasks();
         }
     }
 }

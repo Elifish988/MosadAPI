@@ -38,5 +38,10 @@ namespace MosadApi.Meneger
             }
             return true;
         }
+
+        public void DeleteOldTasks()
+        {
+            base.DeleteOldTasks();
+        }
     }
 }

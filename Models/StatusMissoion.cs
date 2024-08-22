@@ -3,7 +3,7 @@
     public enum StatusMissoion
     {
         Offer,
-        connected,
+        assigned,
         finished
     }
 }

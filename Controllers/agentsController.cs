@@ -31,12 +31,8 @@ namespace MosadApi.Controllers
         {
             var agents = await _context.agents.ToListAsync();
             return Ok(agents);
-
-
-
-
-
         }
+
 
         [HttpPost]
         [Produces("application/json")]
@@ -50,6 +46,7 @@ namespace MosadApi.Controllers
             return Ok(agent.Id);
         }
 
+
         [HttpPut("{id}/pin")]
         public async Task<IActionResult> PutAgent(Guid id, Location location)
         {
@@ -61,7 +58,8 @@ namespace MosadApi.Controllers
                 agent.Location = location;
                 agent.LocationId = location.Id;
                 _context.SaveChanges();
-                _creatMissionByAgent.SearchTargetToAgent(agent);
+                await _creatMissionByAgent.SearchTargetToAgent(agent);// בדיקה האם יש מטרה קרובה
+                _creatMissionByAgent.DeleteOldTasks();// מחיקת הצעות לא רלוונטיות
                 return Ok(agent);
             }
         }
@@ -78,7 +76,8 @@ namespace MosadApi.Controllers
                 location = LoctionMeneger.ChangeLocation(location, direction);
                 _context.Update(location);
                 _context.SaveChanges();
-                _creatMissionByAgent.SearchTargetToAgent(agent);
+                await _creatMissionByAgent.SearchTargetToAgent(agent);// בדיקה האם יש מטרה קרובה
+                _creatMissionByAgent.DeleteOldTasks();// מחיקת הצעות לא רלוונטיות
                 return Ok();
 
             }

@@ -53,7 +53,8 @@ namespace MosadApi.Controllers
                 target.Location = location;
                 target.LocationId = location.Id;
                 _context.SaveChanges();
-                _creatMissionByTarget.SearchTargetToTarget(target);
+                await _creatMissionByTarget.SearchTargetToTarget(target);// בדיקה האם יש מטרה קרובה
+                _creatMissionByTarget.DeleteOldTasks();// מחיקת הצעות לא רלוונטיות
                 return Ok(target);
             }
         }
@@ -69,7 +70,8 @@ namespace MosadApi.Controllers
                 location = LoctionMeneger.ChangeLocation(location, direction);
                 _context.Update(location);
                 _context.SaveChanges();
-                _creatMissionByTarget.SearchTargetToTarget(target);
+                await _creatMissionByTarget.SearchTargetToTarget(target);// בדיקה האם יש מטרה קרובה
+                _creatMissionByTarget.DeleteOldTasks();// מחיקת הצעות לא רלוונטיות
                 return Ok();
 
             }
