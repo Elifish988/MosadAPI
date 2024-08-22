@@ -5,7 +5,7 @@ namespace MosadApi.Models
     public class Agent
     {
         [Key]
-        public Guid? Id { get; set; }
+        public Guid Id { get; set; }
         public string photo_url { get; set; }
         public string Name { get; set; }
         public int? LocationId { get; set; }

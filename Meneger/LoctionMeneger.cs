@@ -4,7 +4,7 @@ using System;
 namespace MosadApi.Helper
 
 {
-    public static class LoctionHelper
+    public static class LoctionMeneger
     {
         public static Location ChangeLocation(Location location, Direction direction)
         {

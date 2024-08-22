@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MosadApi.DAL;
 using MosadApi.Helper;
+using MosadApi.Meneger;
 using MosadApi.Models;
 using MosadApi.Models;
 
@@ -12,10 +13,14 @@ namespace MosadApi.Controllers
     [ApiController]
     public class targetsController : ControllerBase
     {
+        
+        
         private readonly MosadDBContext _context;
-        public targetsController(MosadDBContext mosadDBContext)
+        private readonly CreatMissionByTarget _creatMissionByTarget;
+        public targetsController(MosadDBContext mosadDBContext, CreatMissionByTarget creatMissionByTarget)
         {
             _context = mosadDBContext;
+            _creatMissionByTarget = creatMissionByTarget;
         }
 
         [HttpGet]
@@ -48,6 +53,7 @@ namespace MosadApi.Controllers
                 target.Location = location;
                 target.LocationId = location.Id;
                 _context.SaveChanges();
+                _creatMissionByTarget.SearchTargetToTarget(target);
                 return Ok(target);
             }
         }
@@ -60,9 +66,10 @@ namespace MosadApi.Controllers
             else
             {
                 Location? location = await _context.locations.FindAsync(target.LocationId);
-                location = LoctionHelper.ChangeLocation(location, direction);
+                location = LoctionMeneger.ChangeLocation(location, direction);
                 _context.Update(location);
                 _context.SaveChanges();
+                _creatMissionByTarget.SearchTargetToTarget(target);
                 return Ok();
 
             }

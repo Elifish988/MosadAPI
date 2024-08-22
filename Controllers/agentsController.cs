@@ -5,20 +5,24 @@ using Microsoft.EntityFrameworkCore;
 using MosadApi.Models;
 using MosadApi.Helper;
 using MosadApi.Models;
+using MosadApi.Meneger;
 
 namespace MosadApi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class AgentController : ControllerBase
+    public class agentsController : ControllerBase
     {
 
         private readonly MosadDBContext _context;
-        public AgentController(MosadDBContext mosadDBContext)
+        private readonly CreatMissionByAgent _creatMissionByAgent;
+        public agentsController(MosadDBContext mosadDBContext, CreatMissionByAgent creatMissionByAgent)
         {
             _context = mosadDBContext;
+            _creatMissionByAgent = creatMissionByAgent;
         }
 
+        
 
 
 
@@ -57,6 +61,7 @@ namespace MosadApi.Controllers
                 agent.Location = location;
                 agent.LocationId = location.Id;
                 _context.SaveChanges();
+                _creatMissionByAgent.SearchTargetToAgent(agent);
                 return Ok(agent);
             }
         }
@@ -70,9 +75,10 @@ namespace MosadApi.Controllers
             else
             {
                 Location? location = await _context.locations.FindAsync(agent.LocationId);
-                location = LoctionHelper.ChangeLocation(location, direction);
+                location = LoctionMeneger.ChangeLocation(location, direction);
                 _context.Update(location);
                 _context.SaveChanges();
+                _creatMissionByAgent.SearchTargetToAgent(agent);
                 return Ok();
 
             }
