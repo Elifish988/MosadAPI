@@ -13,10 +13,11 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 string? connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<MosadDBContext>(options => options.UseSqlServer(connectionString));
+builder.Services.AddScoped<CreatMissionByAgent>();// הזרקה של יצירת משימה
+builder.Services.AddScoped<CreatMissionByTarget>();// הזרקה של יצירת משימה
 var app = builder.Build();
 
-builder.Services.AddScoped<CreatMissionByAgent>();// הזרקה של יצירת מסימה
-builder.Services.AddScoped<CreatMissionByTarget>();// הזרקה של יצירת מסימה
+
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
