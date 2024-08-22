@@ -15,6 +15,7 @@ string? connectionString = builder.Configuration.GetConnectionString("DefaultCon
 builder.Services.AddDbContext<MosadDBContext>(options => options.UseSqlServer(connectionString));
 builder.Services.AddScoped<CreatMissionByAgent>();// הזרקה של יצירת משימה
 builder.Services.AddScoped<CreatMissionByTarget>();// הזרקה של יצירת משימה
+builder.Services.AddScoped<MissionsMeneger>();// הזרקה של יצירת MissionsMeneger
 var app = builder.Build();
 
 
