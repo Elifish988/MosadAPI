@@ -66,7 +66,7 @@ namespace MosadApi.Controllers
                     if (_missionsMeneger.theyAreTogether(agentLocation, targetLocation))// בדיקה האם המטרה והסוכן חולקים משבצת
                     {
                         _missionsMeneger.Kill(agent, target, missoion);
-                        return Ok("Objective successfully completed"); 
+                        return Ok("Objective successfully completed");
                     }
                     else
                     {
@@ -76,16 +76,16 @@ namespace MosadApi.Controllers
                         await _missionsMeneger.Direction(agentLocation, targetLocation);
 
                         return Ok("An agent advanced to the target");
-                        
+
                     }
-                    
+
                 }
                 return Ok("Inactive target");
             }
             return Ok("Passed all missoions");
         }
 
-
+        //  כל הבאות להעברה עבור קונטרולר חדש ל MVC 
         // מחזירה את רשימת כל המשימות להצעה עבור MVC
         [HttpGet("GetOptions")]
         public async Task<IActionResult> GetOptions()
@@ -99,6 +99,25 @@ namespace MosadApi.Controllers
             {
                 return NotFound("");
             }
-        } 
+        }
+
+
+        // מייצר את כל הסכימות עבור GeneralView
+        public async Task<IActionResult> GeneralView()
+        {
+            GeneralView generalView = new GeneralView();
+            generalView.SumAgent = await _context.agents.CountAsync();
+            generalView.SumAgentActiv = await _context.agents.CountAsync(agent => agent.Status == StatusAgent.active);
+            generalView.SumTarget = await _context.targets.CountAsync();
+            generalView.SumTargetActiv = await _context.targets.CountAsync(target => target.Status == StatusTarget.free);
+            generalView.SumMissions = await _context.missoions.CountAsync();
+            generalView.SumMissionsActiv = await _context.missoions.CountAsync(mission => mission.Status ==StatusMissoion.Offer);
+            generalView.agentsToTarget = generalView.SumAgent / generalView.SumTarget;
+            //var missionsMVCs = await _missionsMeneger.GetOptions();
+            //generalView.SumMissionsActiv = await _context.agents.CountAsync(agent => agent.Status == StatusAgent.Dormant )
+
+        }
+
+
     }
 }
