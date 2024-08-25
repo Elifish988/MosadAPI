@@ -17,16 +17,15 @@ namespace MosadApi.Meneger
         // מה המרחק מהמטרה
         public async Task<Double> HowFar(Agent agent, Target target)
         {
+            if(agent == null || target == null) { return 30000; }
             Location? agentLocation = await _context.locations.FindAsync(agent.LocationId);
             Location? targetLocation = await _context.locations.FindAsync(target.LocationId);
-
             return Math.Sqrt(Math.Pow(targetLocation.x - agentLocation.x, 2) + Math.Pow(targetLocation.y - agentLocation.y, 2));
         }
 
         // בודקת האם הסוכן בטווח המטרה
         protected async Task<bool> IsNear(Agent agent, Target target)
         {
-            
             if ( await HowFar(agent, target) <= 200)
             {
                 return true;
@@ -43,6 +42,7 @@ namespace MosadApi.Meneger
             missoion.TargetId = target.Id;
             missoion.AgentId = agent.Id;
             missoion.Status = StatusMissoion.Offer;
+            missoion.timeToDo = await TimeToKill(agent, target);
             _context.missoions.Add(missoion);
             await _context.SaveChangesAsync();
         }
@@ -143,5 +143,42 @@ namespace MosadApi.Meneger
             await _context.SaveChangesAsync();
 
         }
+
+        //פונקציה להחזרת מידה על מטרות עבור MVC
+        public async Task<List<MissionsMVC>> GetOptions()
+        {
+            List<MissionsMVC> missionsMVCs = new List<MissionsMVC>();
+            // טלאי קצת מכוער - לטיפול בהמשך
+            // מחיקת מטרה במקרה שהיא התרחקה מאז ההצעה
+            await DeleteOldTasks();
+            //מחיקת הצעה במקרה והמטרה או הסוכן נתפסו
+           var m = await _context.missoions.ToListAsync();
+            foreach (var Missoion in m)
+            {
+                await DeleteIfIsNotRelevant(Missoion);
+            }
+            foreach (Missoion missoion in m)
+            {
+                if (missoion.Status == StatusMissoion.Offer)
+                {
+                    MissionsMVC missionsMVC = new MissionsMVC();
+                    Target? target = await _context.targets.FindAsync(missoion.TargetId);
+                    Agent? agent = await _context.agents.FindAsync(missoion.AgentId);
+                    Location? agentLocation = await _context.locations.FindAsync(agent.LocationId);
+                    Location? targetLocation = await _context.locations.FindAsync(target.LocationId);
+                    missionsMVC.Id = missoion.Id;
+                    missionsMVC.Agent = agent.Name;
+                    missionsMVC.AgentLocation = $"x: {agentLocation.x} , y: {agentLocation.y}";
+                    missionsMVC.Target = target.name;
+                    missionsMVC.TargetLocation = $"x: {targetLocation.x} , y: {targetLocation.y}";
+                    missionsMVC.Distance = await HowFar(agent, target);
+                    missionsMVC.Executiontime = missoion.Executiontime;
+                    missionsMVCs.Add(missionsMVC);
+
+                }
+            }
+            return missionsMVCs;
+        }
+
     }
 }

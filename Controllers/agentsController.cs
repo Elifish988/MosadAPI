@@ -72,8 +72,13 @@ namespace MosadApi.Controllers
             else
             {
                 Location? location = await _context.locations.FindAsync(agent.LocationId);
-                location = LoctionMeneger.ChangeLocation(location, direction);
-                _context.Update(location);
+                Location? newlocation = LoctionMeneger.ChangeLocation(location, direction);
+                // בודקת האם הסוכן נדרש לצאת לחלוטין מחוץ לגבולות המטריצה ומחזיר הודעת שגיעה
+                if(newlocation.x == location.x && newlocation.y == location.y)
+                {
+                    return NotFound("An agent cannot go outside the matrix");
+                }
+                _context.Update(newlocation);
                 await _context.SaveChangesAsync();
                 await _creatMissionByAgent.SearchTargetToAgent(agent);// בדיקה האם יש מטרה קרובה
                 _creatMissionByAgent.DeleteOldTasks();// מחיקת הצעות לא רלוונטיות

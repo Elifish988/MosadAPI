@@ -28,6 +28,13 @@ namespace MosadApi.Controllers
             return Ok(missions);
         }
 
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetMissionsByID(int id)
+        {
+            Missoion? missoion = await _context.missoions.FindAsync(id);
+            return Ok(missoion);
+        }
+
 
         [HttpPut("{id}")]
         public async Task<IActionResult> assignedMissoions(int id, StatusMissoion statusMissoion)
@@ -48,8 +55,8 @@ namespace MosadApi.Controllers
         [HttpPost("update")]
         public async Task<IActionResult> UpdateMissions()
         {
-            var a = await _context.missoions.ToListAsync();
-            foreach (Missoion missoion in a)
+            var m = await _context.missoions.ToListAsync();
+            foreach (Missoion missoion in m)
             {
                 if (missoion.Status == StatusMissoion.assigned)
                 {
@@ -78,5 +85,21 @@ namespace MosadApi.Controllers
             }
             return Ok("Passed all missoions");
         }
+
+
+        // מחזירה את רשימת כל המשימות להצעה עבור MVC
+        [HttpGet("GetOptions")]
+        public async Task<IActionResult> GetOptions()
+        {
+            try
+            {
+                List<MissionsMVC> missionsMVCs = await _missionsMeneger.GetOptions();
+                return Ok(missionsMVCs);
+            }
+            catch
+            {
+                return NotFound("");
+            }
+        } 
     }
 }
