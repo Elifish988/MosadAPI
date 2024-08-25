@@ -16,7 +16,8 @@ namespace MosadApi.Meneger
 
         public async Task SearchTargetToAgent(Agent agent)
         {
-            foreach (Target target in _context.targets)
+            var tar = await _context.targets.ToArrayAsync();
+            foreach (Target target in tar)
             {
                 if (await IsNear(agent, target) && await IsVacant(target))
                 {
@@ -28,7 +29,8 @@ namespace MosadApi.Meneger
 
         public async Task<bool> IsVacant(Target target)
         {
-            await foreach (Missoion missoion in _context.missoions)
+            var mis = await _context.missoions.ToArrayAsync();
+            foreach (Missoion missoion in mis)
             {
                 if (missoion.TargetId == target.Id && missoion.Status != StatusMissoion.Offer)
                 {

@@ -39,7 +39,6 @@ namespace MosadApi.Controllers
         [ProducesResponseType(StatusCodes.Status201Created)]
         public IActionResult CreateAgent(Agent agent)
         {
-            agent.Id = Guid.NewGuid();
             agent.Status = StatusAgent.Dormant;
             _context.agents.Add(agent);
             _context.SaveChanges();
@@ -48,7 +47,7 @@ namespace MosadApi.Controllers
 
 
         [HttpPut("{id}/pin")]
-        public async Task<IActionResult> PutAgent(Guid id, Location location)
+        public async Task<IActionResult> PutAgent(int id, Location location)
         {
             Agent? agent = await _context.agents.FindAsync(id);
             if (agent == null) { return StatusCode(StatusCodes.Status404NotFound); }
@@ -57,7 +56,7 @@ namespace MosadApi.Controllers
                 _context.locations.Add(location);
                 agent.Location = location;
                 agent.LocationId = location.Id;
-                _context.SaveChanges();
+                await _context.SaveChangesAsync();
                 await _creatMissionByAgent.SearchTargetToAgent(agent);// בדיקה האם יש מטרה קרובה
                 _creatMissionByAgent.DeleteOldTasks();// מחיקת הצעות לא רלוונטיות
                 return Ok(agent);
@@ -65,7 +64,7 @@ namespace MosadApi.Controllers
         }
 
         [HttpPut("{id}/move")]
-        public async Task<IActionResult> PutAgent(Guid id, Direction direction)
+        public async Task<IActionResult> PutAgent(int id, Direction direction)
         {
             Agent? agent = await _context.agents.FindAsync(id);
             if (agent == null) { return NotFound("agent is null"); }
@@ -75,7 +74,7 @@ namespace MosadApi.Controllers
                 Location? location = await _context.locations.FindAsync(agent.LocationId);
                 location = LoctionMeneger.ChangeLocation(location, direction);
                 _context.Update(location);
-                _context.SaveChanges();
+                await _context.SaveChangesAsync();
                 await _creatMissionByAgent.SearchTargetToAgent(agent);// בדיקה האם יש מטרה קרובה
                 _creatMissionByAgent.DeleteOldTasks();// מחיקת הצעות לא רלוונטיות
                 return Ok();

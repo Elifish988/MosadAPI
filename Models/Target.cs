@@ -7,7 +7,7 @@ namespace MosadApi.Models
     public class Target
     {
         [Key]
-        public Guid Id { get; set; }
+        public int Id { get; set; }
         public string name { get; set; }
         public string photo_url { get; set; }
         public string position { get; set; }

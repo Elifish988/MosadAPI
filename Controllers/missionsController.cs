@@ -38,17 +38,18 @@ namespace MosadApi.Controllers
             await _missionsMeneger.DeleteOldTasks();// מחיקת מטרה במקרה שהיא התרחקה מאז ההצעה
             await _missionsMeneger.DeleteIfIsNotRelevant(missoion);// מחיקת הצעה במקרה והמטרה או הסוכן נתפסו 
             if (missoion == null) return NotFound("The mission is not relevant anymore");
-            missoion.Status = statusMissoion;
+            missoion.Status = StatusMissoion.assigned;
             missoion.timeToDo = await _missionsMeneger.TimeToKill(agent, target);
             agent.Status = StatusAgent.active;
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
             return Ok(missoion.Status);
         }
 
         [HttpPost("update")]
         public async Task<IActionResult> UpdateMissions()
         {
-            foreach (Missoion missoion in _context.missoions)
+            var a = await _context.missoions.ToListAsync();
+            foreach (Missoion missoion in a)
             {
                 if (missoion.Status == StatusMissoion.assigned)
                 {
@@ -63,12 +64,19 @@ namespace MosadApi.Controllers
                     }
                     else
                     {
+                        // מחשב זמן עד לחיסול
                         missoion.timeToDo = await _missionsMeneger.TimeToKill(agent, target);
+                        // בודק את מיקום המטרה ביחס לסוכן ומקדם אות אליה
+                        await _missionsMeneger.Direction(agentLocation, targetLocation);
 
-
+                        return Ok("An agent advanced to the target");
+                        
                     }
+                    
                 }
+                return Ok("Inactive target");
             }
+            return Ok("Passed all missoions");
         }
     }
 }

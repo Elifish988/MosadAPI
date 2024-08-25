@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.EntityFrameworkCore;
 using MosadApi.DAL;
 using MosadApi.Models;
 using System.Security.Cryptography;
@@ -43,14 +44,15 @@ namespace MosadApi.Meneger
             missoion.AgentId = agent.Id;
             missoion.Status = StatusMissoion.Offer;
             _context.missoions.Add(missoion);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
         }
 
 
         // בודקת האם ההצעות הקודמות רלוונטיות
         public async Task DeleteOldTasks()
         {
-            foreach (Missoion missoion in _context.missoions)
+            var mis = await _context.missoions.ToArrayAsync();
+            foreach (Missoion missoion in mis)
             {
                 if (missoion.Status == StatusMissoion.Offer)
                 {
@@ -59,7 +61,7 @@ namespace MosadApi.Meneger
                     if (!await IsNear(agent, target))
                     {
                         _context.missoions.Remove(missoion);
-                        _context.SaveChanges();
+                        await _context.SaveChangesAsync();
                     }
                 }
 
@@ -76,16 +78,17 @@ namespace MosadApi.Meneger
             if (agent.Status != StatusAgent.Dormant)
             {
                 _context.missoions.Remove(missoion);
-                _context.SaveChanges();
+                await _context.SaveChangesAsync();
             }
             else
             {
-                foreach(Missoion mis in _context.missoions)
+                var mis1 = await _context.missoions.ToArrayAsync();
+                foreach (Missoion mis in mis1)
                 {
                     if(mis.TargetId == target.Id && mis.Status != StatusMissoion.Offer)
                     {
                         _context.missoions.Remove(missoion);
-                        _context.SaveChanges();
+                        await _context.SaveChangesAsync();
                     }
                 }
             }
@@ -107,7 +110,7 @@ namespace MosadApi.Meneger
             agent.Status = StatusAgent.Dormant;
             target.Status = StatusTarget.dead;
             _context.missoions.Remove(missoion);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
         }
 
         //בדיקה מה הזמן שנותר עד חיסול המטרה
@@ -117,27 +120,28 @@ namespace MosadApi.Meneger
         }
 
         // מחשבת את כיוון המטרה
-        public async Task<Direction> Direction(Location agentLocation, Location targetLocation)
+        public async Task Direction(Location agentLocation, Location targetLocation)
         {
-            string tmp = "";
+            
             if(agentLocation.x < targetLocation.x)
             {
-                tmp += "e";
+                agentLocation.x += 1;
             }
-            else if (agentLocation.x > targetLocation.x)
+            if (agentLocation.x > targetLocation.x)
             {
-                tmp += "w";
+                agentLocation.x -= 1;
             }
             if (agentLocation.y < targetLocation.y)
             {
-                tmp += "s";
+                agentLocation.y += 1;
             }
-            else if (agentLocation.y > targetLocation.y)
+            if (agentLocation.y > targetLocation.y)
             {
-                tmp += "n";
+                agentLocation.y -= 1;
             }
+            _context.Update(agentLocation);
+            await _context.SaveChangesAsync();
 
-            for()
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using MosadApi.DAL;
+﻿using Microsoft.EntityFrameworkCore;
+using MosadApi.DAL;
 using MosadApi.Models;
 
 namespace MosadApi.Meneger
@@ -14,7 +15,8 @@ namespace MosadApi.Meneger
 
         public async Task SearchTargetToTarget(Target target)
         {
-            foreach (Agent agent in _context.agents)
+            var age = await _context.agents.ToListAsync();
+            foreach (Agent agent in age)
             {
                 if (await IsNear(agent, target) && await IsVacant(agent))
                 {
@@ -26,7 +28,8 @@ namespace MosadApi.Meneger
 
         public async Task<bool> IsVacant(Agent agent)
         {
-            await foreach (Missoion missoion in _context.missoions)
+            var mis = await _context.missoions.ToArrayAsync();
+            foreach (Missoion missoion in mis)
             {
                 if (missoion.AgentId == agent.Id && missoion.Status != StatusMissoion.Offer)
                 {

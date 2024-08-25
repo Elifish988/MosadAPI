@@ -26,7 +26,7 @@ namespace MosadApi.Controllers
         [HttpGet]
         public async Task<IActionResult> Gettargets()
         {
-            var target = await _context.agents.ToListAsync();
+            var target = await _context.targets.ToListAsync();
             return Ok(target);
         }
 
@@ -35,7 +35,6 @@ namespace MosadApi.Controllers
         [ProducesResponseType(StatusCodes.Status201Created)]
         public IActionResult CreateTarget(Target target)
         {
-            target.Id = Guid.NewGuid();
             target.Status = StatusTarget.free;
             _context.targets.Add(target);
             _context.SaveChanges();
@@ -43,7 +42,7 @@ namespace MosadApi.Controllers
         }
 
         [HttpPut("{id}/pin")]
-        public async Task<IActionResult> PutAgent(Guid id, Location location)
+        public async Task<IActionResult> PutAgent(int id, Location location)
         {
             Target? target = await _context.targets.FindAsync(id);
             if (target == null) { return StatusCode(StatusCodes.Status404NotFound); }
@@ -52,7 +51,7 @@ namespace MosadApi.Controllers
                 _context.locations.Add(location);
                 target.Location = location;
                 target.LocationId = location.Id;
-                _context.SaveChanges();
+                await _context.SaveChangesAsync();
                 await _creatMissionByTarget.SearchTargetToTarget(target);// בדיקה האם יש מטרה קרובה
                 _creatMissionByTarget.DeleteOldTasks();// מחיקת הצעות לא רלוונטיות
                 return Ok(target);
@@ -60,7 +59,7 @@ namespace MosadApi.Controllers
         }
 
         [HttpPut("{id}/move")]
-        public async Task<IActionResult> PutAgent(Guid id, Direction direction)
+        public async Task<IActionResult> PutAgent(int id, Direction direction)
         {
             Target? target = await _context.targets.FindAsync(id);
             if (target == null) { return NotFound("agent is null"); }
@@ -69,7 +68,7 @@ namespace MosadApi.Controllers
                 Location? location = await _context.locations.FindAsync(target.LocationId);
                 location = LoctionMeneger.ChangeLocation(location, direction);
                 _context.Update(location);
-                _context.SaveChanges();
+                await _context.SaveChangesAsync();
                 await _creatMissionByTarget.SearchTargetToTarget(target);// בדיקה האם יש מטרה קרובה
                 _creatMissionByTarget.DeleteOldTasks();// מחיקת הצעות לא רלוונטיות
                 return Ok();
