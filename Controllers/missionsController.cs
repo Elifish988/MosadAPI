@@ -42,9 +42,8 @@ namespace MosadApi.Controllers
             Missoion? missoion = await _context.missoions.FindAsync(id);
             Agent? agent = await _context.agents.FindAsync(missoion.AgentId);
             Target? target = await _context.targets.FindAsync(missoion.TargetId);
-            await _missionsMeneger.DeleteOldTasks();// מחיקת מטרה במקרה שהיא התרחקה מאז ההצעה
-            await _missionsMeneger.DeleteIfIsNotRelevant(missoion);// מחיקת הצעה במקרה והמטרה או הסוכן נתפסו 
-            if (missoion == null) return NotFound("The mission is not relevant anymore");
+            await _missionsMeneger.DeleteOldTasks();// מחיקת מטרה במקרה שהיא התרחקה מאז ההצעה 
+            if (missoion == null || await _missionsMeneger.DeleteIfIsNotRelevant(missoion) == false) return NotFound("The mission is not relevant anymore");
             missoion.Status = StatusMissoion.assigned;
             missoion.timeToDo = await _missionsMeneger.TimeToKill(agent, target);
             agent.Status = StatusAgent.active;

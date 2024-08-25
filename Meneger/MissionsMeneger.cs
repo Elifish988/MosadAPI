@@ -71,14 +71,19 @@ namespace MosadApi.Meneger
 
 
         // מחיקת הצעה כאשר מטרה או סוכן אינם פנויים
-        public async Task DeleteIfIsNotRelevant(Missoion missoion)
+        public async Task<bool> DeleteIfIsNotRelevant(Missoion missoion)
         {
             Agent? agent = await _context.agents.FindAsync(missoion.AgentId);
             Target? target = await _context.targets.FindAsync(missoion.TargetId);
             if (agent.Status != StatusAgent.Dormant)
             {
-                _context.missoions.Remove(missoion);
-                await _context.SaveChangesAsync();
+                // טלאי שנועד למחיקת משימות שלא תהיינה רלוונטיות לעולם
+                if(missoion.Status == 0)
+                {
+                    _context.missoions.Remove(missoion);
+                    _context.SaveChanges();
+                }
+                return false;
             }
             else
             {
@@ -87,11 +92,17 @@ namespace MosadApi.Meneger
                 {
                     if(mis.TargetId == target.Id && mis.Status != StatusMissoion.Offer)
                     {
-                        _context.missoions.Remove(missoion);
-                        await _context.SaveChangesAsync();
+                        // טלאי שנועד למחיקת משימות שלא תהיינה רלוונטיות לעולם
+                        if (missoion.Status == 0)
+                        {
+                            _context.missoions.Remove(missoion);
+                            _context.SaveChanges();
+                        }
+                        return false;
                     }
                 }
             }
+            return true;
 
         }
 
@@ -153,13 +164,9 @@ namespace MosadApi.Meneger
             await DeleteOldTasks();
             //מחיקת הצעה במקרה והמטרה או הסוכן נתפסו
            var m = await _context.missoions.ToListAsync();
-            foreach (var Missoion in m)
-            {
-                await DeleteIfIsNotRelevant(Missoion);
-            }
             foreach (Missoion missoion in m)
             {
-                if (missoion.Status == StatusMissoion.Offer)
+                if (missoion.Status == StatusMissoion.Offer && await DeleteIfIsNotRelevant(missoion))
                 {
                     MissionsMVC missionsMVC = new MissionsMVC();
                     Target? target = await _context.targets.FindAsync(missoion.TargetId);
