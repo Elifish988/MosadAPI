@@ -120,6 +120,7 @@ namespace MosadApi.Meneger
         public async Task Kill(Agent agent, Target target, Missoion missoion)
         {
             agent.Status = StatusAgent.Dormant;
+            agent.CountKill += 1;
             target.Status = StatusTarget.dead;
             _context.missoions.Remove(missoion);
             await _context.SaveChangesAsync();
@@ -155,7 +156,7 @@ namespace MosadApi.Meneger
             await _context.SaveChangesAsync();
 
         }
-
+        // צריך להעביר למנג'ר ייחודי
         //פונקציה להחזרת מידה על מטרות עבור MVC
         public async Task<List<MissionsMVC>> GetOptions()
         {
@@ -228,8 +229,8 @@ namespace MosadApi.Meneger
                 {
                     agentStatusMVC.mission = mission.Id;
                     agentStatusMVC.timeToDo = mission.timeToDo;
-                    agentStatusMVC.CountKills = await _context.missoions.CountAsync(mission => mission.Status == StatusMissoion.finished && agent.Id == mission.AgentId);
                 }
+                agentStatusMVC.CountKills = agent.CountKill;
                 agentStatusMVCs.Add(agentStatusMVC);
 
             }

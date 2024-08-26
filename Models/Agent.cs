@@ -12,6 +12,7 @@ namespace MosadApi.Models
         public Location? Location { get; set; }
         public StatusAgent? Status { get; set; }
         public string? token { get; set; }
+        public int? CountKill { get; set; } = 0;
     }
 }
 

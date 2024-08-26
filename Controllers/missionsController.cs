@@ -85,74 +85,7 @@ namespace MosadApi.Controllers
             return Ok("Passed all missoions");
         }
 
-        //  כל הבאות להעברה עבור קונטרולר חדש ל MVC 
-        // מחזירה את רשימת כל המשימות להצעה עבור MVC
-        [HttpGet("GetOptions")]
-        public async Task<IActionResult> GetOptions()
-        {
-            try
-            {
-                List<MissionsMVC> missionsMVCs = await _missionsMeneger.GetOptions();
-                return Ok(missionsMVCs);
-            }
-            catch
-            {
-                return NotFound("");
-            }
-        }
 
-
-
-
-        // מייצר את כל הסכימות עבור GeneralView
-        [HttpGet("GeneralView")]
-        public async Task<IActionResult> GeneralView()
-        {
-            try
-            {
-                GeneralView generalView = await _missionsMeneger.GeneralView();
-                return Ok(generalView);
-            }
-            catch
-            {
-                return NotFound("generalView not found");
-            }
-
-
-
-        }
-
-        //מייצר את כל הסכימות עבור AgentStatus
-        [HttpGet("AgentStatus")]
-        public async Task<IActionResult> AgentStatus()
-        {
-            try
-            {
-                List<AgentStatusMVC> agentStatusMVCs = await _missionsMeneger.AgentStatus();
-                return Ok(agentStatusMVCs);
-            }
-            catch
-            {
-                return NotFound("AgentStatus not found");
-            }
-        }
-        
-
-
-        //מייצר את כל הסכימות עבור TargetStatus
-        [HttpGet("TargetStatus")]
-        public async Task<IActionResult> TargetStatus()
-        {
-            try
-            {
-                List<TargetStatusMVC> targetStatusMVCs = await _missionsMeneger.TargetStatus();
-                return Ok(targetStatusMVCs);
-            }
-            catch
-            {
-                return NotFound("TargetStatus not found");
-            }
-        }
 
 
     }
