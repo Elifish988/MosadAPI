@@ -102,21 +102,41 @@ namespace MosadApi.Controllers
         }
 
 
+
+
         // מייצר את כל הסכימות עבור GeneralView
+        [HttpGet("GeneralView")]
         public async Task<IActionResult> GeneralView()
         {
-            GeneralView generalView = new GeneralView();
-            generalView.SumAgent = await _context.agents.CountAsync();
-            generalView.SumAgentActiv = await _context.agents.CountAsync(agent => agent.Status == StatusAgent.active);
-            generalView.SumTarget = await _context.targets.CountAsync();
-            generalView.SumTargetActiv = await _context.targets.CountAsync(target => target.Status == StatusTarget.free);
-            generalView.SumMissions = await _context.missoions.CountAsync();
-            generalView.SumMissionsActiv = await _context.missoions.CountAsync(mission => mission.Status ==StatusMissoion.Offer);
-            generalView.agentsToTarget = generalView.SumAgent / generalView.SumTarget;
-            //var missionsMVCs = await _missionsMeneger.GetOptions();
-            //generalView.SumMissionsActiv = await _context.agents.CountAsync(agent => agent.Status == StatusAgent.Dormant )
+            try
+            {
+                GeneralView generalView = await _missionsMeneger.GeneralView();
+                return Ok(generalView);
+            }
+            catch
+            {
+                return NotFound("generalView not found");
+            }
+
+
 
         }
+
+        //מייצר את כל הסכימות עבור AgentStatus
+        [HttpGet("AgentStatus")]
+        public async Task<IActionResult> AgentStatus()
+        {
+            try
+            {
+                List<AgentStatusMVC> agentStatusMVCs = await _missionsMeneger.AgentStatus();
+                return Ok(agentStatusMVCs);
+            }
+            catch
+            {
+                return NotFound("AgentStatus not found");
+            }
+        }
+
 
 
     }

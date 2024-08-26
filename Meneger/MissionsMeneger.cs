@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using MosadApi.DAL;
 using MosadApi.Models;
+using System.Reflection;
 using System.Security.Cryptography;
 
 namespace MosadApi.Meneger
@@ -187,5 +188,55 @@ namespace MosadApi.Meneger
             return missionsMVCs;
         }
 
+
+        // מייצר את כל הסכימות עבור GeneralView
+        public async Task<GeneralView> GeneralView()
+        {
+            GeneralView generalView = new GeneralView();
+            generalView.SumAgent = await _context.agents.CountAsync();
+            generalView.SumAgentActiv = await _context.agents.CountAsync(agent => agent.Status == StatusAgent.active);
+            generalView.SumTarget = await _context.targets.CountAsync();
+            generalView.SumTargetActiv = await _context.targets.CountAsync(target => target.Status == StatusTarget.free);
+            generalView.SumMissions = await _context.missoions.CountAsync();
+            generalView.SumMissionsActiv = await _context.missoions.CountAsync(mission => mission.Status == StatusMissoion.Offer);
+            generalView.agentsToTarget = generalView.SumAgent / generalView.SumTarget;
+            generalView.agentsToTargetRelevant = await _context.agents.CountAsync
+                (agent => _context.missoions.Any
+                (mission => mission.Status == 0 &&
+                mission.AgentId == agent.Id &&
+                agent.Status == StatusAgent.Dormant));
+
+            return generalView;
+        }
+
+
+        // מייצר את כל הסכימות עבור GeneralView
+        public async Task<List<AgentStatusMVC>> AgentStatus()
+        {
+            List<AgentStatusMVC> agentStatusMVCs = new List<AgentStatusMVC>();
+            var As = await _context.agents.ToListAsync();
+            foreach(Agent agent in As)
+            {
+                AgentStatusMVC agentStatusMVC = new AgentStatusMVC();
+                agentStatusMVC.Name = agent.Name;
+                //מציאת לוקישן
+                Location location = await _context.locations.FindAsync(agent.LocationId);
+                agentStatusMVC.Locition = $" X : {location.x} , Y {location.y}";
+                agentStatusMVC.Status = agent.Status.ToString();
+                Missoion? mission = await _context.missoions.FirstOrDefaultAsync(mission => mission.AgentId == agent.Id);
+                if(mission != null)
+                {
+                    agentStatusMVC.mission = mission.Id;
+                    agentStatusMVC.timeToDo = mission.timeToDo;
+                    agentStatusMVC.CountKills = await _context.missoions.CountAsync(mission => mission.Status == StatusMissoion.finished && agent.Id == mission.AgentId);
+                }
+                agentStatusMVCs.Add(agentStatusMVC);
+
+            }
+
+            return agentStatusMVCs;
+
+
+        }
     }
 }
