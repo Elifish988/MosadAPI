@@ -175,7 +175,7 @@ namespace MosadApi.Meneger
                     Location? agentLocation = await _context.locations.FindAsync(agent.LocationId);
                     Location? targetLocation = await _context.locations.FindAsync(target.LocationId);
                     missionsMVC.Id = missoion.Id;
-                    missionsMVC.Agent = agent.Name;
+                    missionsMVC.Agent = agent.nickname;
                     missionsMVC.AgentLocation = $"x: {agentLocation.x} , y: {agentLocation.y}";
                     missionsMVC.Target = target.name;
                     missionsMVC.TargetLocation = $"x: {targetLocation.x} , y: {targetLocation.y}";
@@ -218,12 +218,12 @@ namespace MosadApi.Meneger
             foreach(Agent agent in As)
             {
                 AgentStatusMVC agentStatusMVC = new AgentStatusMVC();
-                agentStatusMVC.Name = agent.Name;
+                agentStatusMVC.Name = agent.nickname;
                 //מציאת לוקישן
                 Location location = await _context.locations.FindAsync(agent.LocationId);
                 agentStatusMVC.Locition = $" X : {location.x} , Y {location.y}";
                 agentStatusMVC.Status = agent.Status.ToString();
-                Missoion? mission = await _context.missoions.FirstOrDefaultAsync(mission => mission.AgentId == agent.Id);
+                Missoion? mission = await _context.missoions.FirstOrDefaultAsync(mission => mission.AgentId == agent.Id && mission.Status == StatusMissoion.assigned);
                 if(mission != null)
                 {
                     agentStatusMVC.mission = mission.Id;

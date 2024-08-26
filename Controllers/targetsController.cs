@@ -9,7 +9,7 @@ using MosadApi.Models;
 
 namespace MosadApi.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("[controller]")]
     [ApiController]
     public class targetsController : ControllerBase
     {
@@ -38,7 +38,7 @@ namespace MosadApi.Controllers
             target.Status = StatusTarget.free;
             _context.targets.Add(target);
             _context.SaveChanges();
-            return Ok(target.Id);
+            return StatusCode(StatusCodes.Status200OK, new { Id = target.Id });
         }
 
         [HttpPut("{id}/pin")]

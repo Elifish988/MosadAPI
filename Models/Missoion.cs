@@ -11,5 +11,6 @@ namespace MosadApi.Models
         public Double? timeToDo { get; set; }
         public StatusMissoion Status { get; set; }
         public DateTime? Executiontime { get; set; }
+        public string? token { get; set; }
     }
 }

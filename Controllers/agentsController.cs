@@ -6,10 +6,11 @@ using MosadApi.Models;
 using MosadApi.Helper;
 using MosadApi.Models;
 using MosadApi.Meneger;
+using Newtonsoft.Json.Linq;
 
 namespace MosadApi.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("[controller]")]
     [ApiController]
     public class agentsController : ControllerBase
     {
@@ -42,7 +43,7 @@ namespace MosadApi.Controllers
             agent.Status = StatusAgent.Dormant;
             _context.agents.Add(agent);
             _context.SaveChanges();
-            return Ok(agent.Id);
+            return StatusCode(StatusCodes.Status200OK, new { Id = agent.Id });
         }
 
 

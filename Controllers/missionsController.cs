@@ -8,7 +8,7 @@ using System.Reflection;
 
 namespace MosadApi.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("[controller]")]
     [ApiController]
     public class missionsController : ControllerBase
     {
