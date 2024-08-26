@@ -238,5 +238,27 @@ namespace MosadApi.Meneger
 
 
         }
+        
+
+
+        // מייצר את כל הסכימות עבור GeneralView
+        public async Task<List<TargetStatusMVC>> TargetStatus()
+        {
+            List<TargetStatusMVC> targetStatusMVCs = new List<TargetStatusMVC>();
+            var Ts = await _context.targets.ToListAsync();
+            foreach (Target target in Ts)
+            {
+                TargetStatusMVC targetStatusMVC = new TargetStatusMVC();
+                targetStatusMVC.name = target.name;
+                //מציאת לוקישן
+                Location location = await _context.locations.FindAsync(target.LocationId);
+                targetStatusMVC.Location = $" X : {location.x} , Y {location.y}";
+                targetStatusMVC.Status = target.Status.ToString();
+                targetStatusMVC.position = target.position;
+                targetStatusMVCs.Add(targetStatusMVC);
+
+            }
+            return targetStatusMVCs;
+        }
     }
 }

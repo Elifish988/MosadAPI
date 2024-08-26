@@ -136,7 +136,23 @@ namespace MosadApi.Controllers
                 return NotFound("AgentStatus not found");
             }
         }
+        
 
+
+        //מייצר את כל הסכימות עבור TargetStatus
+        [HttpGet("TargetStatus")]
+        public async Task<IActionResult> TargetStatus()
+        {
+            try
+            {
+                List<TargetStatusMVC> targetStatusMVCs = await _missionsMeneger.TargetStatus();
+                return Ok(targetStatusMVCs);
+            }
+            catch
+            {
+                return NotFound("TargetStatus not found");
+            }
+        }
 
 
     }

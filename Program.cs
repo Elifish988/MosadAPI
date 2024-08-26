@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using MosadApi.DAL;
 using MosadApi.Meneger;
 
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -12,7 +13,7 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 string? connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-builder.Services.AddDbContext<MosadDBContext>(options => options.UseSqlServer(connectionString));
+builder.Services.AddDbContext<MosadDBContext>(options => options.UseSqlServer(connectionString).UseValidationCheckConstraints());
 builder.Services.AddScoped<CreatMissionByAgent>();// הזרקה של יצירת משימה
 builder.Services.AddScoped<CreatMissionByTarget>();// הזרקה של יצירת משימה
 builder.Services.AddScoped<MissionsMeneger>();// הזרקה של יצירת MissionsMeneger
