@@ -68,6 +68,7 @@ namespace MosadApi.Controllers
                 Location? location = await _context.locations.FindAsync(target.LocationId);
                 int test_x = location.x;
                 int test_y = location.y;
+                if(target.Status == StatusTarget.dead) { return NotFound("the target is ded"); }
                 LoctionMeneger.ChangeLocation(location, direction.direction);
                 //בודקת האם המטרה נדרשת לצאת לחלוטין מחוץ לגבולות המטריצה ומחזיר הודעת שגיעה
                 if (test_x == location.x && test_y == location.y)
