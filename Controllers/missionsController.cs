@@ -54,26 +54,24 @@ namespace MosadApi.Controllers
         [HttpPost("update")]
         public async Task<IActionResult> UpdateMissions()
         {
-            var m = await _context.missoions.ToListAsync();
+            var m = await _context.missoions.Include(mission => mission.Agent)
+                .ThenInclude(Agent => Agent.Location).Include(mission => mission.Target).ThenInclude(Target => Target.Location).ToListAsync();
             foreach (Missoion missoion in m)
             {
                 if (missoion.Status == StatusMissoion.assigned)
                 {
-                    Target? target = await _context.targets.FindAsync(missoion.TargetId);
-                    Agent? agent = await _context.agents.FindAsync(missoion.AgentId);
-                    Location? agentLocation = await _context.locations.FindAsync(agent.LocationId);
-                    Location? targetLocation = await _context.locations.FindAsync(target.LocationId);
-                    if (_missionsMeneger.theyAreTogether(agentLocation, targetLocation))// בדיקה האם המטרה והסוכן חולקים משבצת
+                    // בדיקה האם המטרה והסוכן חולקים משבצת
+                    if ( _missionsMeneger.theyAreTogether(missoion.Agent.Location, missoion.Target.Location))
                     {
-                        _missionsMeneger.Kill(agent, target, missoion);
+                        _missionsMeneger.Kill(missoion.Agent, missoion.Target, missoion);
                         return Ok("Objective successfully completed");
                     }
                     else
                     {
                         // מחשב זמן עד לחיסול
-                        missoion.timeToDo = await _missionsMeneger.TimeToKill(agent, target);
+                        missoion.timeToDo = await _missionsMeneger.TimeToKill(missoion.Agent, missoion.Target);
                         // בודק את מיקום המטרה ביחס לסוכן ומקדם אות אליה
-                        await _missionsMeneger.Direction(agentLocation, targetLocation);
+                        await _missionsMeneger.Direction(missoion.Agent.Location, missoion.Target.Location);
 
                         return Ok("An agent advanced to the target");
 

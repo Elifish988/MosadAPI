@@ -4,7 +4,6 @@ using MosadApi.DAL;
 using Microsoft.EntityFrameworkCore;
 using MosadApi.Models;
 using MosadApi.Helper;
-using MosadApi.Models;
 using MosadApi.Meneger;
 using Newtonsoft.Json.Linq;
 

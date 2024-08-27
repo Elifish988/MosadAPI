@@ -42,6 +42,8 @@ namespace MosadApi.Meneger
             Missoion missoion = new Missoion();
             missoion.TargetId = target.Id;
             missoion.AgentId = agent.Id;
+            missoion.Agent = agent;
+            missoion.Target = target;
             missoion.Status = StatusMissoion.Offer;
             missoion.timeToDo = await TimeToKill(agent, target);
             _context.missoions.Add(missoion);
@@ -52,14 +54,14 @@ namespace MosadApi.Meneger
         // בודקת האם ההצעות הקודמות רלוונטיות
         public async Task DeleteOldTasks()
         {
-            var mis = await _context.missoions.ToArrayAsync();
+            var mis = await _context.missoions.Include(mission => mission.Agent)
+                .Include(mission => mission.Target).ToListAsync();
             foreach (Missoion missoion in mis)
             {
                 if (missoion.Status == StatusMissoion.Offer)
                 {
-                    Target? target = await _context.targets.FindAsync(missoion.TargetId);
-                    Agent? agent = await _context.agents.FindAsync(missoion.AgentId);
-                    if (!await IsNear(agent, target))
+                    
+                    if (!await IsNear(missoion.Agent, missoion.Target))
                     {
                         _context.missoions.Remove(missoion);
                         await _context.SaveChangesAsync();
@@ -74,9 +76,8 @@ namespace MosadApi.Meneger
         // מחיקת הצעה כאשר מטרה או סוכן אינם פנויים
         public async Task<bool> DeleteIfIsNotRelevant(Missoion missoion)
         {
-            Agent? agent = await _context.agents.FindAsync(missoion.AgentId);
-            Target? target = await _context.targets.FindAsync(missoion.TargetId);
-            if (agent.Status != StatusAgent.Dormant)
+            
+            if (missoion.Agent.Status != StatusAgent.Dormant)
             {
                 // טלאי שנועד למחיקת משימות שלא תהיינה רלוונטיות לעולם
                 if(missoion.Status == 0)
@@ -91,7 +92,7 @@ namespace MosadApi.Meneger
                 var mis1 = await _context.missoions.ToArrayAsync();
                 foreach (Missoion mis in mis1)
                 {
-                    if(mis.TargetId == target.Id && mis.Status != StatusMissoion.Offer)
+                    if(mis.TargetId == missoion.Target.Id && mis.Status != StatusMissoion.Offer)
                     {
                         // טלאי שנועד למחיקת משימות שלא תהיינה רלוונטיות לעולם
                         if (missoion.Status == 0)
@@ -165,22 +166,22 @@ namespace MosadApi.Meneger
             // מחיקת מטרה במקרה שהיא התרחקה מאז ההצעה
             await DeleteOldTasks();
             //מחיקת הצעה במקרה והמטרה או הסוכן נתפסו
-           var m = await _context.missoions.ToListAsync();
+           var m = await _context.missoions
+                .Include(mission => mission.Agent).ThenInclude(Agent => Agent.Location)
+                .Include(mission => mission.Target).ThenInclude(Target => Target.Location).ToListAsync();
             foreach (Missoion missoion in m)
             {
                 if (missoion.Status == StatusMissoion.Offer && await DeleteIfIsNotRelevant(missoion))
                 {
                     MissionsMVC missionsMVC = new MissionsMVC();
-                    Target? target = await _context.targets.FindAsync(missoion.TargetId);
-                    Agent? agent = await _context.agents.FindAsync(missoion.AgentId);
-                    Location? agentLocation = await _context.locations.FindAsync(agent.LocationId);
-                    Location? targetLocation = await _context.locations.FindAsync(target.LocationId);
                     missionsMVC.Id = missoion.Id;
-                    missionsMVC.Agent = agent.nickname;
-                    missionsMVC.AgentLocation = $"x: {agentLocation.x} , y: {agentLocation.y}";
-                    missionsMVC.Target = target.name;
-                    missionsMVC.TargetLocation = $"x: {targetLocation.x} , y: {targetLocation.y}";
-                    missionsMVC.Distance = await HowFar(agent, target);
+                    missionsMVC.Agent = missoion.Agent.nickname;
+                    missionsMVC.AgentLocation = 
+                        $"x: {missoion.Agent.Location.x} , y: {missoion.Agent.Location.y}";
+                    missionsMVC.Target = missoion.Target.name;
+                    missionsMVC.TargetLocation = 
+                        $"x: {missoion.Target.Location.x} , y: {missoion.Target.Location.y}";
+                    missionsMVC.Distance = await HowFar(missoion.Agent, missoion.Target);
                     missionsMVC.Executiontime = missoion.Executiontime;
                     missionsMVCs.Add(missionsMVC);
 
@@ -215,14 +216,12 @@ namespace MosadApi.Meneger
         public async Task<List<AgentStatusMVC>> AgentStatus()
         {
             List<AgentStatusMVC> agentStatusMVCs = new List<AgentStatusMVC>();
-            var As = await _context.agents.ToListAsync();
+            var As = await _context.agents.Include(Agent => Agent.Location).ToListAsync();
             foreach(Agent agent in As)
             {
                 AgentStatusMVC agentStatusMVC = new AgentStatusMVC();
                 agentStatusMVC.Name = agent.nickname;
-                //מציאת לוקישן
-                Location location = await _context.locations.FindAsync(agent.LocationId);
-                agentStatusMVC.Locition = $" X : {location.x} , Y {location.y}";
+                agentStatusMVC.Locition = $" X : {agent.Location.x} , Y {agent.Location.y}";
                 agentStatusMVC.Status = agent.Status.ToString();
                 Missoion? mission = await _context.missoions.FirstOrDefaultAsync(mission => mission.AgentId == agent.Id && mission.Status == StatusMissoion.assigned);
                 if(mission != null)
@@ -246,14 +245,12 @@ namespace MosadApi.Meneger
         public async Task<List<TargetStatusMVC>> TargetStatus()
         {
             List<TargetStatusMVC> targetStatusMVCs = new List<TargetStatusMVC>();
-            var Ts = await _context.targets.ToListAsync();
+            var Ts = await _context.targets.Include(Target => Target.Location).ToListAsync();
             foreach (Target target in Ts)
             {
                 TargetStatusMVC targetStatusMVC = new TargetStatusMVC();
                 targetStatusMVC.name = target.name;
-                //מציאת לוקישן
-                Location location = await _context.locations.FindAsync(target.LocationId);
-                targetStatusMVC.Location = $" X : {location.x} , Y {location.y}";
+                targetStatusMVC.Location = $" X : {target.Location.x} , Y {target.Location.y}";
                 targetStatusMVC.Status = target.Status.ToString();
                 targetStatusMVC.position = target.position;
                 targetStatusMVCs.Add(targetStatusMVC);
