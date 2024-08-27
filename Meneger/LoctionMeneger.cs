@@ -7,44 +7,44 @@ namespace MosadApi.Helper
     public static class LoctionMeneger
     {
 
-        public static Location ChangeLocation(Location location, Direction direction)
+        public static Location ChangeLocation(Location location, string direction)
         {
 
             switch (direction)
             {
 
-                case Direction.e:
+                case "e":
                     location.x = Plus(location.x);
                     break;
 
-                case Direction.n:
+                case "n":
                     location.y = Less(location.y);
                     break;
 
-                case Direction.w:
+                case "w":
                     location.x = Less(location.x);
                     break;
 
-                case Direction.s:
+                case "s":
                     location.y = Plus(location.y);
                     break;
 
-                case Direction.ne:
+                case "ne":
                     location.y = Less(location.y);
                     location.x = Plus(location.x);
                     break;
 
-                case Direction.se:
+                case "se":
                     location.y = Plus(location.y);
                     location.x = Plus(location.x);
                     break;
 
-                case Direction.sw:
+                case "sw":
                     location.y = Plus(location.y);
                     location.x = Less(location.x);
                     break;
 
-                case Direction.nw:
+                case "nw":
                     location.y = Less(location.y);
                     location.x = Less(location.x);
                     break;
@@ -53,20 +53,11 @@ namespace MosadApi.Helper
 
         }
 
-        public static bool InRange(int num)
-        {
-            if (num < 1 && num > 1000)
-            {
-                return false;
-            }
-            return true;
-
-        }
 
         public static int Plus(int num)
         {
             int tmp = num + 1;
-            if (InRange(tmp))
+            if (tmp <= 1000)
             {
                 return tmp;
             }
@@ -76,7 +67,7 @@ namespace MosadApi.Helper
         public static int Less(int num)
         {
             int tmp = num - 1;
-            if (InRange(tmp))
+            if (tmp > 0)
             {
                 return tmp;
             }

@@ -59,14 +59,21 @@ namespace MosadApi.Controllers
         }
 
         [HttpPut("{id}/move")]
-        public async Task<IActionResult> PutAgent(int id, Direction direction)
+        public async Task<IActionResult> PutAgent(int id, DirectionModel direction)
         {
             Target? target = await _context.targets.FindAsync(id);
             if (target == null) { return NotFound("agent is null"); }
             else
             {
                 Location? location = await _context.locations.FindAsync(target.LocationId);
-                location = LoctionMeneger.ChangeLocation(location, direction);
+                int test_x = location.x;
+                int test_y = location.y;
+                LoctionMeneger.ChangeLocation(location, direction.direction);
+                //בודקת האם המטרה נדרשת לצאת לחלוטין מחוץ לגבולות המטריצה ומחזיר הודעת שגיעה
+                if (test_x == location.x && test_y == location.y)
+                {
+                    return NotFound("An agent cannot go outside the matrix");
+                }
                 _context.Update(location);
                 await _context.SaveChangesAsync();
                 await _creatMissionByTarget.SearchTargetToTarget(target);// בדיקה האם יש מטרה קרובה

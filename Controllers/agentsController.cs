@@ -65,7 +65,7 @@ namespace MosadApi.Controllers
         }
 
         [HttpPut("{id}/move")]
-        public async Task<IActionResult> PutAgent(int id, Direction direction)
+        public async Task<IActionResult> PutAgent(int id, DirectionModel direction)
         {
             Agent? agent = await _context.agents.FindAsync(id);
             if (agent == null) { return NotFound("agent is null"); }
@@ -73,13 +73,15 @@ namespace MosadApi.Controllers
             else
             {
                 Location? location = await _context.locations.FindAsync(agent.LocationId);
-                Location? newlocation = LoctionMeneger.ChangeLocation(location, direction);
-                // בודקת האם הסוכן נדרש לצאת לחלוטין מחוץ לגבולות המטריצה ומחזיר הודעת שגיעה
-                if(newlocation.x == location.x && newlocation.y == location.y)
+                int test_x = location.x;
+                int test_y = location.y;
+                LoctionMeneger.ChangeLocation(location, direction.direction);
+                //בודקת האם הסוכן נדרש לצאת לחלוטין מחוץ לגבולות המטריצה ומחזיר הודעת שגיאה - קצת מכוער אבל נאלצתי לעשות ככה בגלל שינויים של הרגע האחרון
+                if (test_x == location.x && test_y == location.y)
                 {
                     return NotFound("An agent cannot go outside the matrix");
                 }
-                _context.Update(newlocation);
+                _context.Update(location);
                 await _context.SaveChangesAsync();
                 await _creatMissionByAgent.SearchTargetToAgent(agent);// בדיקה האם יש מטרה קרובה
                 _creatMissionByAgent.DeleteOldTasks();// מחיקת הצעות לא רלוונטיות

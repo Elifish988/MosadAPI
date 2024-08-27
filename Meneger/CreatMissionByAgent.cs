@@ -21,7 +21,7 @@ namespace MosadApi.Meneger
             {
                 if (await IsNear(agent, target) && await IsVacant(target))
                 {
-                    CreateMissoion(agent, target);
+                   await CreateMissoion(agent, target);
                 }
 
             }
